@@ -5,23 +5,224 @@ format: html
 editor: visual
 ---
 
-## Quarto
+https://github.com/CarloGrouper/ENVS-193DS_spring-2026_final.git
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+# Setup
 
 ```{r}
-1 + 1
+
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(janitor))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(gt))
+suppressPackageStartupMessages(library(rstatix))
+suppressPackageStartupMessages(library(here))
+suppressPackageStartupMessages(library(DHARMa))
+suppressPackageStartupMessages(library(ggeffects))
+suppressPackageStartupMessages(library(ggplot2))
+
+nests <- read_csv(here("data", "nest_data_final.csv"), show_col_types = FALSE)
+
 ```
 
-You can add options to executable code like this
+# Problem 1
+
+## 1a
+
+Part 1: They likely used a logistic regression, since they tested whether distance to the water edge predicts the probability of American Avocet microhabitat use.
+
+Part 2: They likely used a chi-square test of independence, since they tested for a relationship between two categorical variables: bird species and habitat type.
+
+## 1b
+
+Part 1: Distance to the water edge was associated with the probability of American Avocet microhabitat use, suggesting that avocets may prefer habitats at certain distances from the water's edge.
+
+Part 2: Habitat use differed among American Avocets, Forster’s Terns, and Black-necked Stilts, indicating that these species use habitat types in different ways.
+
+## 1c
+
+One additional variable could be native plant cover (%), measured as the percent of ground area covered by native vegetation within a 1 \#$m^2$ sampling quadrat. This is a continuous variable and may influence American Avocet habitat use because vegetation cover can affect food availability, visibility of predators, and nesting habitat suitability.
+
+# Problem 2
+
+## 2a
 
 ```{r}
-#| echo: false
-2 * 2
+
+nests_clean <- nests |>
+  select(case_control, height_cm, ant_species) |>
+  filter(ant_species %in% c("AB", "RRB", "BBR")) |>
+  mutate(
+    ant_species = factor(
+      ant_species,
+      levels = c("AB", "RRB", "BBR")
+    ),
+    ant_full = case_when(
+      ant_species == "AB" ~ "Crematogaster sjostedti",
+      ant_species == "RRB" ~ "Crematogaster mimosae",
+      ant_species == "BBR" ~ "Crematogaster nigriceps"
+    )
+  )
+
+str(nests_clean)
+
+slice_sample(nests_clean, n = 10)
+
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+## 2b
+
+A value of 1 means a tree had a bird nest present (nest occurrence), while 0 means the tree was an available/non-nest tree used as a control. Biologically, this represents whether or not birds chose that tree for nesting.
+
+## 2c
+
+Tree height is a continuous variable measured in centimeters. As tree height increases, the probability of nest occurrence may increase because taller trees may provide better visibility, predator avoidance, or structural support for nests. This information comes from the Methods section describing nest site selection variables and tree structural measurements.
+
+Acacia ant species is a categorical variable with three levels (AB, RRB, BBR). It could influence nest occurrence because different ant species may vary in aggressiveness or protection of trees, which could either attract or deter birds from nesting. This is described in the Introduction and Methods sections discussing ant–bird interactions and nesting behavior.
+
+## 2d
+
+```{r}
+
+model_table <- tibble(
+  model_number = c(1, 2),
+  model_description = c(
+    "case_control ~ height_cm + ant_species (no interaction)",
+    "case_control ~ height_cm * ant_species (interaction included)"
+  )
+)
+
+model_table
+
+```
+
+## 2e
+
+```{r}
+
+model1 <- glm(case_control ~ height_cm + ant_species,
+              data = nests_clean,
+              family = binomial)
+
+model2 <- glm(case_control ~ height_cm * ant_species,
+              data = nests_clean,
+              family = binomial)
+
+```
+
+## 2f
+
+```{r}
+
+AIC(model1, model2)
+
+```
+
+The best model as determined by Akaike’s Information Criterion (AIC) is the model that includes tree height, acacia ant species, and their interaction (i.e., case_control \~ height_cm \* ant_species) because it has the lower AIC value.
+
+## 2g
+
+```{r}
+
+sim_res <- simulateResiduals(fittedModel = model2)
+
+plot(sim_res)
+testUniformity(sim_res)
+testDispersion(sim_res)
+
+```
+
+## 2h
+
+```{r}
+
+pred <- ggpredict(model2, terms = c("height_cm", "ant_species"))
+
+ggplot() +
+  geom_point(data = nests_clean,
+             aes(x = height_cm,
+                 y = case_control,
+                 color = ant_species),
+             alpha = 0.4) +
+  geom_line(data = pred,
+            aes(x = x,
+                y = predicted,
+                color = group)) +
+  geom_ribbon(data = pred,
+              aes(x = x,
+                  ymin = conf.low,
+                  ymax = conf.high,
+                  fill = group),
+              alpha = 0.2) +
+  facet_wrap(~group) +
+  labs(x = "Tree height (cm)",
+       y = "Probability of nest occurrence (0–1)") +
+  theme_classic() +
+  theme(legend.position = "none",
+        panel.grid = element_blank(),
+        panel.background = element_blank())
+
+```
+
+## 2i
+
+**Figure 1.** Effect of tree height and acacia ant species on nest occurrence probability. This figure shows predicted probability of bird nest occurrence as a function of tree height (cm) for three acacia ant species, with 95% confidence intervals and underlying observations from the dataset. Predictions are based on a logistic regression model including an interaction between tree height and ant species.
+
+## 2j
+
+```{r}
+
+# Create a new data frame for prediction at 600 cm
+new_data <- data.frame(
+  height_cm = 600,
+  ant_species = levels(nests_clean$ant_species)
+)
+
+# Get predicted probabilities
+predict(model2, newdata = new_data, type = "response")
+
+```
+
+## 2k
+
+At a tree height of 600 cm, the predicted probability of nest occurrence varies strongly by ant species, with relatively low probability for one species (\~0.20), moderate probability for another (\~0.74), and very high probability for the third (\~1.00). As shown in the figure, the relationship between tree height and nest occurrence differs across acacia ant species, indicating an interaction where the effect of height is not consistent across species. Overall, nest probability generally increases with tree height, but the strength of this increase depends on the ant species present. Biologically, this pattern likely reflects differences in how ant species influence nesting safety and suitability, such as variation in aggressiveness or protection of trees, which can make certain trees more attractive to nesting birds.
+
+# Problem 3
+
+## Setup
+
+```{r}
+
+birds <- read_csv(here("data", "bird_weather_observations copy.csv"), show_col_types = FALSE)
+
+```
+
+
+## 3a
+
+In Homework 2, I used a boxplot (for weather type vs large bird sightings) and a scatterplot (temperature vs small bird sightings), while in Homework 3 I used a single scatterplot with both bird types shown together using different colors.
+
+All visualizations are similar in that they represent bird observations collected over 20–30 minute periods across 35 days, and they all examine how environmental conditions (weather or temperature) relate to bird abundance. They also all use ggplot with point-based or distribution-based displays to show variation in bird counts over time.
+
+Across all plots, there is an overall pattern suggesting that warmer or sunnier conditions are associated with more bird sightings, especially for larger birds. Homework 2 shows this more indirectly (through higher large bird counts under sunny conditions and a slight positive temperature relationship), while Homework 3 shows a clearer positive correlation between temperature and bird sightings for both small and large birds. The difference in clarity likely comes from Homework 3 having more complete data (35 rows) and combining both bird types into one visualization, making trends easier to compare directly.
+
+I did not complete homework 3 at the correct time, so I did not recieve feedback from my peers.
+
+## 3b
+
+```{r}
+
+names(birds)
+
+```
+
+
+## 3c
+
+## 3d
+
+## 3e
+
+## 3f
+
+## 3g
