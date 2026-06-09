@@ -41,7 +41,7 @@ Part 2: Habitat use differed among American Avocets, Forster’s Terns, and Blac
 
 ## 1c
 
-One additional variable could be native plant cover (%), measured as the percent of ground area covered by native vegetation within a 1 \#$m^2$ sampling quadrat. This is a continuous variable and may influence American Avocet habitat use because vegetation cover can affect food availability, visibility of predators, and nesting habitat suitability.
+One additional variable could be native plant cover (%), measured as the percent of ground area covered by native vegetation within a 1$m^2$ sampling quadrat. This is a continuous variable and may influence American Avocet habitat use because vegetation cover can affect food availability, visibility of predators, and nesting habitat suitability.
 
 # Problem 2
 
@@ -216,12 +216,117 @@ This approach is appropriate because the response variables (BigBird and SmallBi
 
 ## 3c
 
+### Assumptions
 
+```{r}
+
+bigbird_model <- glm(BigBird ~ Temp_F + Condition,
+                     data = birds,
+                     family = poisson)
+
+smallbird_model <- glm(SmallBird ~ Temp_F + Condition,
+                       data = birds,
+                       family = poisson)
+
+deviance(bigbird_model) / df.residual(bigbird_model)
+
+deviance(smallbird_model) / df.residual(smallbird_model)
+
+```
+
+The dispersion statistic for the BigBird model was 0.7321749, indicating no evidence of overdispersion. The dispersion statistic for the SmallBird model was 1.683467, which is somewhat greater than 1 and suggests mild overdispersion, but not enough to immediately reject the Poisson model.
+
+### Run the Analysis
+
+```{r}
+
+summary(bigbird_model)
+
+summary(smallbird_model)
+
+```
+
+The number of large birds observed was not significantly related to temperature (p = 0.6953). Among weather conditions, only MostlyCloudy had a significant effect on large bird counts (p = 0.0327), with expected counts 1.6931503 times higher than the reference weather condition.
+
+The number of small birds observed increased significantly with temperature (p = 0.00380). For every 1°F increase in temperature, the expected number of small birds increased by a factor of 1.0476133. Small bird counts were also significantly lower during Rain (p = 0.02895) and Smoke (p = 0.00937) conditions, with expected counts of 0.2748754 and 0.3750228 times those of the reference weather condition, respectively.
+
+### Effect size
+
+```{r}
+
+exp(coef(bigbird_model))
+
+exp(coef(smallbird_model))
+
+```
+
+For the BigBird model: MostlyCloudy weather increased expected large bird counts by 1.6931503 times relative to the reference condition.
+
+For the SmallBird model: Each 1°F increase in temperature increased expected small bird counts by 1.0476133 times. Rain reduced expected small bird counts to 0.2748754 times the reference condition. Smoke reduced expected small bird counts to 0.3750228 times the reference condition.
 
 ## 3d
 
+```{r}
+
+big_pred <- ggpredict(bigbird_model, terms = "Temp_F")
+small_pred <- ggpredict(smallbird_model, terms = "Temp_F")
+
+ggplot() +
+
+  # Small bird data
+  geom_point(
+    data = birds,
+    aes(x = Temp_F, y = SmallBird),
+    color = "blue",
+    size = 3,
+    alpha = 0.7
+  ) +
+
+  # Big bird data
+  geom_point(
+    data = birds,
+    aes(x = Temp_F, y = BigBird),
+    color = "red",
+    size = 3,
+    alpha = 0.7
+  ) +
+
+  # Small bird prediction
+  geom_line(
+    data = small_pred,
+    aes(x = x, y = predicted),
+    color = "blue",
+    linewidth = 1
+  ) +
+
+  # Big bird prediction
+  geom_line(
+    data = big_pred,
+    aes(x = x, y = predicted),
+    color = "red",
+    linewidth = 1
+  ) +
+
+  labs(
+    title = "Bird abundance across temperatures",
+    subtitle = "Blue = small birds, Red = large birds",
+    x = "Temperature (°F)",
+    y = "Bird count"
+  ) +
+
+  theme_minimal()
+
+```
+
 ## 3e
+
+**Figure 1.** Relationship between temperature and bird abundance. Blue points represent observations of small bird counts, while red points represent observations of large bird counts recorded during 20–30 minute observation periods. Blue and red lines show the predicted bird counts from Poisson regression models for small and large birds, respectively. The figure illustrates how bird abundance changes with temperature (°F), with the underlying data displayed as individual points.
 
 ## 3f
 
+Small bird abundance increased significantly with temperature (Poisson regression: β = 0.04651, z = 2.895, p = 0.00380). The effect size indicates that each 1°F increase in temperature was associated with a 1.0476133-fold increase in the expected number of small birds. In contrast, large bird abundance was not significantly related to temperature (β = -0.006986, z = -0.392, p = 0.6953). Small bird counts were also significantly lower during rain and smoke conditions compared to the reference weather condition (Rain: p = 0.02895; Smoke: p = 0.00937).
+
 ## 3g
+
+I attended workshop on week 10 and did indeed complete my affective visualization.
+
