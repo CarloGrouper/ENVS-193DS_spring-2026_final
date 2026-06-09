@@ -210,14 +210,13 @@ I did not complete homework 3 at the correct time, so I did not recieve feedback
 
 ## 3b
 
-```{r}
+A suitable analysis is to run two separate linear regression models predicting bird counts from temperature and environmental conditions. One model uses BigBird counts as the response variable, and the other uses SmallBird counts as the response variable, both with predictors such as temperature and atmospheric conditions.
 
-names(birds)
-
-```
-
+This approach is appropriate because the response variables (BigBird and SmallBird) are continuous count variables, and the predictors include both a continuous variable (temperature) and a categorical variable (weather condition). Running separate models allows direct comparison of how environmental factors differently affect large and small birds across the 35 observation periods.
 
 ## 3c
+
+
 
 ## 3d
 
