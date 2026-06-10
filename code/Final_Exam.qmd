@@ -1,8 +1,12 @@
 ---
 title: "Final Project"
 author: "Carlo Lapayese-Calderon"
-format: pdf
 date: "2026-06-09"
+
+format:
+  pdf:
+    toc: true
+
 editor: visual
 ---
 
