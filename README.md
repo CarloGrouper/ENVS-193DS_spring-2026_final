@@ -13,6 +13,7 @@ Final_Exam.pdf – Rendered PDF version of the completed final exam report.
 
 ENVS-193DS_spring-2026_final.Rproj – RStudio project file for the repository.
 
-## Rendered output
+## Rendered outputDouble check your assignment!
 
-[Final Report PDF](final_exam.pdf)
+
+[Final Report PDF](code/Final_Exam.pdf)
