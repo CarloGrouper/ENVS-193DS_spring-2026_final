@@ -35,9 +35,9 @@ Part 2: They likely used a chi-square test of independence, since they tested fo
 
 ## 1b
 
-Part 1: Distance to the water edge was associated with the probability of American Avocet microhabitat use, suggesting that avocets may prefer habitats at certain distances from the water's edge.
+Part 1: Distance to the water edge was associated to the probability of American Avocet microhabitat use, suggesting that avocets may prefer habitats at certain distances from the water's edge.
 
-Part 2: Habitat use differed among American Avocets, Forster’s Terns, and Black-necked Stilts, indicating that these species use habitat types in different ways.
+Part 2: Habitat use differed among American Avocets, Forster's Terns, and Black-necked Stilts, indicating that these species use habitat types in different ways.
 
 ## 1c
 
@@ -82,19 +82,7 @@ Acacia ant species is a categorical variable with three levels (AB, RRB, BBR). I
 
 ## 2d
 
-```{r}
-
-model_table <- tibble(
-  model_number = c(1, 2),
-  model_description = c(
-    "case_control ~ height_cm + ant_species (no interaction)",
-    "case_control ~ height_cm * ant_species (interaction included)"
-  )
-)
-
-model_table
-
-```
+N/A
 
 ## 2e
 
@@ -118,7 +106,7 @@ AIC(model1, model2)
 
 ```
 
-The best model as determined by Akaike’s Information Criterion (AIC) is the model that includes tree height, acacia ant species, and their interaction (i.e., case_control \~ height_cm \* ant_species) because it has the lower AIC value.
+The best model as determined by Akaike’s Information Criterion (AIC) is the model that includes tree height, acacia ant species, and their interaction because it has the lower AIC value.
 
 ## 2g
 
@@ -134,39 +122,11 @@ testDispersion(sim_res)
 
 ## 2h
 
-```{r}
-
-pred <- ggpredict(model2, terms = c("height_cm", "ant_species"))
-
-ggplot() +
-  geom_point(data = nests_clean,
-             aes(x = height_cm,
-                 y = case_control,
-                 color = ant_species),
-             alpha = 0.4) +
-  geom_line(data = pred,
-            aes(x = x,
-                y = predicted,
-                color = group)) +
-  geom_ribbon(data = pred,
-              aes(x = x,
-                  ymin = conf.low,
-                  ymax = conf.high,
-                  fill = group),
-              alpha = 0.2) +
-  facet_wrap(~group) +
-  labs(x = "Tree height (cm)",
-       y = "Probability of nest occurrence (0–1)") +
-  theme_classic() +
-  theme(legend.position = "none",
-        panel.grid = element_blank(),
-        panel.background = element_blank())
-
-```
+N/A
 
 ## 2i
 
-**Figure 1.** Effect of tree height and acacia ant species on nest occurrence probability. This figure shows predicted probability of bird nest occurrence as a function of tree height (cm) for three acacia ant species, with 95% confidence intervals and underlying observations from the dataset. Predictions are based on a logistic regression model including an interaction between tree height and ant species.
+N/A
 
 ## 2j
 
@@ -185,7 +145,7 @@ predict(model2, newdata = new_data, type = "response")
 
 ## 2k
 
-At a tree height of 600 cm, the predicted probability of nest occurrence varies strongly by ant species, with relatively low probability for one species (\~0.20), moderate probability for another (\~0.74), and very high probability for the third (\~1.00). As shown in the figure, the relationship between tree height and nest occurrence differs across acacia ant species, indicating an interaction where the effect of height is not consistent across species. Overall, nest probability generally increases with tree height, but the strength of this increase depends on the ant species present. Biologically, this pattern likely reflects differences in how ant species influence nesting safety and suitability, such as variation in aggressiveness or protection of trees, which can make certain trees more attractive to nesting birds.
+At a tree height of 600 cm, the predicted probability of nest occurrence varies strongly by ant species, with relatively low probability for one species (approximately 0.20), moderate probability for another (approximately 0.74), and very high probability for the third (approximately 1.00). As shown in the figure, the relationship between tree height and nest occurrence differs across acacia ant species, indicating an interaction where the effect of height is not consistent across species. Overall, nest probability generally increases with tree height, but the strength of this increase depends on the ant species present. Biologically, this pattern likely reflects differences in how ant species influence nesting safety and suitability, such as variation in aggressiveness or protection of trees, which can make certain trees more attractive to nesting birds.
 
 # Problem 3
 
@@ -196,7 +156,6 @@ At a tree height of 600 cm, the predicted probability of nest occurrence varies 
 birds <- read_csv(here("data", "bird_weather_observations copy.csv"), show_col_types = FALSE)
 
 ```
-
 
 ## 3a
 
@@ -329,4 +288,3 @@ Small bird abundance increased significantly with temperature (Poisson regressio
 ## 3g
 
 I attended workshop on week 10 and did indeed complete my affective visualization.
-
